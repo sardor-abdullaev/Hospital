@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema({
   login: {
     type: String,
     required: [true, "Login kiriting."],
+    unique: true,
   },
   password: {
     type: String,

@@ -37,7 +37,30 @@ const doctorSchema = new mongoose.Schema({
       },
     },
   },
-  status: Boolean,
+  status: {
+    type: Number,
+    default: 1,
+  },
+  spec: {
+    type: mongoose.Types.ObjectId,
+    ref: "Spec",
+    required: true,
+  },
+  gender: {
+    type: Number,
+    enum: [1, 2],
+    //1-Erkak,2-Ayol
+  },
+  region: {
+    type: mongoose.Types.ObjectId,
+    ref: "Region",
+    required: true,
+  },
+  district: {
+    type: mongoose.Types.ObjectId,
+    ref: "District",
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("Doctor", doctorSchema);
