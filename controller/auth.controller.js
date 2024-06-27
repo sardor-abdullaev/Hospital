@@ -12,6 +12,8 @@ exports.protect = async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -41,6 +43,23 @@ exports.protect = async (req, res, next) => {
   next();
 };
 
+const restrictedRoles = {
+  hr: ["doctor", "worker"],
+  doctor: ["patient"],
+};
+
+exports.isRestricted = (req, res, next) => {
+  if (
+    req.user.role == "admin" ||
+    (restrictedRoles[req.user.role] &&
+      restrictedRoles[req.user.role].includes(req.body.role))
+  ) {
+    next();
+  } else {
+    throw new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN);
+  }
+};
+
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -48,6 +67,12 @@ exports.restrictTo = (...roles) => {
     }
     next();
   };
+};
+
+const signToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 };
 
 const createSendToken = (user, statusCode, res) => {
@@ -89,8 +114,38 @@ exports.login = async (req, res) => {
   const user = await User.findOne({ login }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    throw new AppError("Incorrect email or password", StatusCodes.BAD_REQUEST);
+    throw new AppError("Login yoki parolingiz xato.", StatusCodes.BAD_REQUEST);
   }
-  //   3) if everything ok, send token to client
+
+  // 3) save entered time
+  if (req.user) {
+    saveExitTime(user);
+  }
+  saveEnterTime(user);
+
+  //   4) if everything ok, send token to client
   createSendToken(user, 200, res);
+};
+
+const saveEnterTime = async (user) => {
+  user.loginAt.push({ enter: Date.now() });
+  await user.save();
+};
+
+saveExitTime = async (user) => {
+  user.loginAt[user.loginAt.length - 1].exit = Date.now();
+  await user.save();
+};
+
+exports.logout = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  req.user = null;
+
+  saveExitTime(user);
+
+  res.cookie("jwt", "loggedout", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: "success" });
 };
