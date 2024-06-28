@@ -118,30 +118,31 @@ exports.login = async (req, res) => {
   }
 
   // 3) save entered time
-  if (req.user) {
-    saveExitTime(user);
-  }
-  saveEnterTime(user);
+  //   if (req.user) {
+  //     console.log("exit");
+  //     saveExitTime(req.user._id);
+  //   }
+  saveEnterTime(user._id);
 
   //   4) if everything ok, send token to client
   createSendToken(user, 200, res);
 };
 
-const saveEnterTime = async (user) => {
+const saveEnterTime = async (userId) => {
+  const user = await User.findById(userId);
   user.loginAt.push({ enter: Date.now() });
   await user.save();
 };
 
-saveExitTime = async (user) => {
+const saveExitTime = async (userId) => {
+  const user = await User.findById(userId);
   user.loginAt[user.loginAt.length - 1].exit = Date.now();
   await user.save();
 };
 
-exports.logout = async (req, res) => {
-  const user = await User.findById(req.user._id);
+exports.logout = (req, res) => {
+  saveExitTime(req.user._id);
   req.user = null;
-
-  saveExitTime(user);
 
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),

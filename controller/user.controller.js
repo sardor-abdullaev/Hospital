@@ -15,6 +15,7 @@ const createAdmin = async () => {
 const createUser = async (req, res) => {
   const newUser = await User.create(req.body);
 
+  newUser.password = undefined;
   res.status(StatusCodes.CREATED).json({
     status: "success",
     data: newUser,
