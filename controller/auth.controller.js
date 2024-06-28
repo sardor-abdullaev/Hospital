@@ -48,7 +48,7 @@ const restrictedRoles = {
   doctor: ["patient"],
 };
 
-exports.isRestricted = (req, res, next) => {
+exports.isCreateRestricted = (req, res, next) => {
   if (
     req.user.role == "admin" ||
     (restrictedRoles[req.user.role] &&
@@ -118,26 +118,25 @@ exports.login = async (req, res) => {
   }
 
   // 3) save entered time
-  //   if (req.user) {
-  //     console.log("exit");
-  //     saveExitTime(req.user._id);
-  //   }
-  saveEnterTime(user._id);
+  user.loginAt.push({ enter: Date.now() });
+  await user.save();
 
   //   4) if everything ok, send token to client
   createSendToken(user, 200, res);
 };
 
-const saveEnterTime = async (userId) => {
-  const user = await User.findById(userId);
-  user.loginAt.push({ enter: Date.now() });
-  await user.save();
-};
+// const saveEnterTime = async (userId) => {
+//   const user = await User.findById(userId);
+//   user.loginAt.push({ enter: Date.now() });
+//   await user.save();
+// };
 
 const saveExitTime = async (userId) => {
   const user = await User.findById(userId);
-  user.loginAt[user.loginAt.length - 1].exit = Date.now();
-  await user.save();
+  if (user) {
+    user.loginAt[user.loginAt.length - 1].exit = Date.now();
+    await user.save();
+  }
 };
 
 exports.logout = (req, res) => {
