@@ -9,10 +9,11 @@ router.post("/login", authController.login);
 
 router.use(authController.protect);
 router.get("/logout", authController.logout);
+router.post("/create", authController.isRestricted, userController.createUser);
 router.post(
-  "/create",
-  authController.isCreateRestricted,
-  userController.createUser
+  "/resetpassword",
+  authController.isRestricted,
+  authController.resetToDefaultPassword
 );
 
 module.exports = router;

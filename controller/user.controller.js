@@ -7,7 +7,7 @@ const createAdmin = async () => {
 
   admin = await User.create({
     login: "admin",
-    password: process.env.ADMIN_PASSWORD,
+    password: process.env.ADMIN_PASSWORD || "admin123",
     role: "admin",
   });
 };

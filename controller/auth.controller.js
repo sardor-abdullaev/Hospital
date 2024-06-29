@@ -17,9 +17,11 @@ exports.protect = async (req, res, next) => {
   }
 
   if (!token) {
-    throw new AppError(
-      "Siz registratsiyadan o'tmagansiz. Ma'lumot olish uchun admin bilan bog'laning.",
-      StatusCodes.UNAUTHORIZED
+    next(
+      new AppError(
+        "Siz registratsiyadan o'tmagansiz. Ma'lumot olish uchun admin bilan bog'laning.",
+        StatusCodes.UNAUTHORIZED
+      )
     );
   }
 
@@ -32,9 +34,11 @@ exports.protect = async (req, res, next) => {
   // 3) Check if user still exists
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
-    throw new AppError(
-      "Bu tokenga tegishli foydalanuvchi mavjud emas!",
-      StatusCodes.UNAUTHORIZED
+    next(
+      new AppError(
+        "Bu tokenga tegishli foydalanuvchi mavjud emas!",
+        StatusCodes.UNAUTHORIZED
+      )
     );
   }
 
@@ -48,7 +52,7 @@ const restrictedRoles = {
   doctor: ["patient"],
 };
 
-exports.isCreateRestricted = (req, res, next) => {
+exports.isRestricted = (req, res, next) => {
   if (
     req.user.role == "admin" ||
     (restrictedRoles[req.user.role] &&
@@ -56,14 +60,14 @@ exports.isCreateRestricted = (req, res, next) => {
   ) {
     next();
   } else {
-    throw new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN);
+    next(new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN));
   }
 };
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
-      throw new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN);
+      return next(new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN));
     }
     next();
   };
@@ -99,14 +103,13 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-exports.login = async (req, res) => {
+exports.login = async (req, res, next) => {
   const { login, password } = req.body;
 
   //   1) check if email and password exist
   if (!login || !password) {
-    throw new AppError(
-      "Iltimos login va parolni kiriting",
-      StatusCodes.BAD_REQUEST
+    return next(
+      new AppError("Iltimos login va parolni kiriting", StatusCodes.BAD_REQUEST)
     );
   }
 
@@ -114,7 +117,9 @@ exports.login = async (req, res) => {
   const user = await User.findOne({ login }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user.password))) {
-    throw new AppError("Login yoki parolingiz xato.", StatusCodes.BAD_REQUEST);
+    return next(
+      new AppError("Login yoki parolingiz xato.", StatusCodes.BAD_REQUEST)
+    );
   }
 
   // 3) save entered time
@@ -148,4 +153,17 @@ exports.logout = (req, res) => {
     httpOnly: true,
   });
   res.status(200).json({ status: "success" });
+};
+
+exports.resetToDefaultPassword = async (req, res, next) => {
+  const user = await User.findById(req.body.user);
+  if (!user) {
+    next(new AppError("Foydalanuvchi topilmadi!", StatusCodes.NOT_FOUND));
+  }
+  user.password = process.env.DEFAULT_PASSWORD || "test123";
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+  });
 };
