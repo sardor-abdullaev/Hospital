@@ -52,26 +52,10 @@ const restrictedRoles = {
   doctor: ["patient"],
 };
 
-exports.isRestricted = (req, res, next) => {
-  if (
-    req.user.role == "admin" ||
-    (restrictedRoles[req.user.role] &&
-      restrictedRoles[req.user.role].includes(req.body.role))
-  ) {
-    next();
-  } else {
-    next(new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN));
-  }
-};
-
-exports.restrictTo = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return next(new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN));
-    }
-    next();
-  };
-};
+exports.isRestricted = (role, req) =>
+  req.user.role == "admin" ||
+  (restrictedRoles[req.user.role] &&
+    restrictedRoles[req.user.role].includes(role));
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -160,10 +144,32 @@ exports.resetToDefaultPassword = async (req, res, next) => {
   if (!user) {
     next(new AppError("Foydalanuvchi topilmadi!", StatusCodes.NOT_FOUND));
   }
-  user.password = process.env.DEFAULT_PASSWORD || "test123";
+
+  if (this.isRestricted(user.role, req)) {
+    user.password = process.env.DEFAULT_PASSWORD || "test123";
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+    });
+  } else {
+    next(new AppError("Sizga mumkinmas.", StatusCodes.FORBIDDEN));
+  }
+};
+
+exports.updatePassword = async (req, res, next) => {
+  const user = await User.findById(req.user._id).select("+password");
+
+  if (!(await user.correctPassword(req.body.password, user.password))) {
+    return next(
+      new AppError("Kiritilgan parol noto'g'ri.", StatusCodes.UNAUTHORIZED)
+    );
+  }
+
+  user.password = req.body.newpassword;
   await user.save();
 
-  res.status(200).json({
+  res.status(StatusCodes.OK).json({
     status: "success",
   });
 };
