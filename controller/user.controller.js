@@ -95,15 +95,41 @@ const getUser = async (req, res, next) => {
     );
   }
 
-  let userPopulate;
-  [Worker, Doctor].forEach(async (Model) => {
-    userPopulate = userPopulate || (await Model.findOne({ user: user._id }));
-  });
+  if (!isRestricted(user.role, req)) {
+    next(new AppError("Sizga mumkinmas.", StatusCodes.FORBIDDEN));
+  } else {
+    let userPopulate;
 
-  res.status(StatusCodes.OK).json({
-    status: "success",
-    user,
-    userPopulate,
+    [Worker, Doctor].forEach(async (Model) => {
+      userPopulate = userPopulate || (await Model.findOne({ user: user._id }));
+    });
+
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      user,
+      userPopulate,
+    });
+  }
+};
+
+const getAllUsers = async (req, res, next) => {
+  if (!["admin", "hr"].includes(req.user.role)) {
+    return next(new AppError("Sizga mumkinmas.", StatusCodes.FORBIDDEN));
+  }
+
+  let userPopulate;
+  const users = await User.find({ role: { $ne: "admin" } });
+  const usersPopulate = users.map((user) => {
+    userPopulate = null;
+    [Worker, Doctor].forEach(async (Model) => {
+      userPopulate =
+        userPopulate ||
+        (await Model.findOne(
+          { user: user._id },
+          { select: "name lname sname" }
+        ));
+    });
+    return userPopulate || {};
   });
 };
 
@@ -114,4 +140,5 @@ module.exports = {
   deleteUser,
   getUser,
   getMe,
+  getAllUsers,
 };

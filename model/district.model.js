@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
 const districtSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
   region: {
     type: mongoose.Types.ObjectId,
     ref: "Region",

@@ -45,7 +45,7 @@ const doctorSchema = new mongoose.Schema(
     spec: {
       type: mongoose.Types.ObjectId,
       ref: "Spec",
-      required: true,
+      // required: true,
     },
     gender: {
       type: Number,
@@ -55,12 +55,12 @@ const doctorSchema = new mongoose.Schema(
     region: {
       type: mongoose.Types.ObjectId,
       ref: "Region",
-      required: true,
+      // required: true,
     },
     district: {
       type: mongoose.Types.ObjectId,
       ref: "District",
-      required: true,
+      // required: true,
     },
   },
   {
