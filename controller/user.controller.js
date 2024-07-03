@@ -94,29 +94,26 @@ const getUser = async (req, res, next) => {
       new AppError("Foydalanuvchi topilmadi.", StatusCodes.NOT_FOUND)
     );
   }
+  // TODO: need to add restrict function or not
+  let userPopulate;
 
-  if (!isRestricted(user.role, req)) {
-    next(new AppError("Sizga mumkinmas.", StatusCodes.FORBIDDEN));
-  } else {
-    let userPopulate;
+  [Worker, Doctor].forEach(async (Model) => {
+    userPopulate =
+      userPopulate ||
+      (await Model.findOne({ user: user._id }).populate({
+        path: "user",
+        select: "login role",
+      }));
+  });
 
-    [Worker, Doctor].forEach(async (Model) => {
-      userPopulate = userPopulate || (await Model.findOne({ user: user._id }));
-    });
-
-    res.status(StatusCodes.OK).json({
-      status: "success",
-      user,
-      userPopulate,
-    });
-  }
+  res.status(StatusCodes.OK).json({
+    status: "success",
+    user: userPopulate,
+  });
 };
 
 const getAllUsers = async (req, res, next) => {
-  if (!["admin", "hr"].includes(req.user.role)) {
-    return next(new AppError("Sizga mumkinmas.", StatusCodes.FORBIDDEN));
-  }
-
+  // TODO: need to add restrict function
   let userPopulate;
   const users = await User.find({ role: { $ne: "admin" } });
   const usersPopulate = users.map((user) => {
@@ -127,9 +124,14 @@ const getAllUsers = async (req, res, next) => {
         (await Model.findOne(
           { user: user._id },
           { select: "name lname sname" }
-        ));
+        ).populate({ path: "user", select: "login role" }));
     });
     return userPopulate || {};
+  });
+
+  res.status(StatusCodes.OK).json({
+    status: "success",
+    users: usersPopulate,
   });
 };
 
