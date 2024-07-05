@@ -57,6 +57,21 @@ exports.isRestricted = (role, req) =>
   (restrictedRoles[req.user.role] &&
     restrictedRoles[req.user.role].includes(role));
 
+exports.restrictTo = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      //TODO: need more logic
+      return next(
+        new AppError(
+          "You do not have permission to perform this action",
+          StatusCodes.FORBIDDEN
+        )
+      );
+    }
+    next();
+  };
+};
+
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
