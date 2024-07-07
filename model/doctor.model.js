@@ -8,17 +8,17 @@ const doctorSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    name: {
+    fname: {
       type: String,
       required: [true, "Ismingizni kiriting."],
+    },
+    mname: {
+      type: String,
+      required: [true, "Otangizni ismini kiriting."],
     },
     lname: {
       type: String,
-      required: [true, "Ismingizni kiriting."],
-    },
-    sname: {
-      type: String,
-      required: [true, "Ismingizni kiriting."],
+      required: [true, "Familiyangizni kiriting."],
     },
     phone: {
       type: String,
