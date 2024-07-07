@@ -1,30 +1,21 @@
 const express = require("express");
+const router = express.Router();
 
 const authController = require("../controller/auth.controller");
 const doctorController = require("../controller/doctor.controller");
-
-const router = express.Router();
 
 router.use(authController.protect);
 
 router
   .route("/")
-  .post(
-    authController.restrictTo("admin", "hr", "doctor"),
-    doctorController.createDoctor
-  )
+  .post(authController.restrictTo("admin", "hr"), doctorController.createDoctor)
   .get(authController.restrictTo("admin", "hr"), doctorController.getAllDoctor);
 
+router.use(authController.restrictTo("admin", "hr", "self"));
 router
   .route("/:id")
-  .get(authController.restrictTo("admin", "hr"), doctorController.getDoctor)
-  .patch(
-    authController.restrictTo("admin", "hr", "doctor"),
-    doctorController.updateDoctor
-  )
-  .delete(
-    authController.restrictTo("admin", "hr", "doctor"),
-    doctorController.deleteDoctor
-  );
+  .get(doctorController.getDoctor)
+  .patch(doctorController.updateDoctor)
+  .delete(doctorController.deleteDoctor);
 
 module.exports = router;

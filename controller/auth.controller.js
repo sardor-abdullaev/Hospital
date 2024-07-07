@@ -59,16 +59,32 @@ exports.isRestricted = (role, req) =>
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      //TODO: need more logic
-      return next(
-        new AppError(
-          "You do not have permission to perform this action",
-          StatusCodes.FORBIDDEN
-        )
-      );
+    if (roles.includes(req.user.role)) {
+      return next();
     }
-    next();
+    if (roles.includes("self")) {
+      req.body.user = req.params.id ? null : req.user._id;
+      req.params.id = req.body.user ? null : req.params.id;
+      if (
+        (req.user._id == req.body.user || req.user._id == req.params.id) &&
+        (req.user.role == "doctor" || req.user.role == "worker")
+      ) {
+        return next();
+      } else {
+        return next(
+          new AppError(
+            "You do not have permission to perform this action",
+            StatusCodes.FORBIDDEN
+          )
+        );
+      }
+    }
+    return next(
+      new AppError(
+        "You do not have permission to perform this action",
+        StatusCodes.FORBIDDEN
+      )
+    );
   };
 };
 
@@ -160,16 +176,12 @@ exports.resetToDefaultPassword = async (req, res, next) => {
     next(new AppError("Foydalanuvchi topilmadi!", StatusCodes.NOT_FOUND));
   }
 
-  if (this.isRestricted(user.role, req)) {
-    user.password = process.env.DEFAULT_PASSWORD || "test123";
-    await user.save();
+  user.password = process.env.DEFAULT_PASSWORD || "test123";
+  await user.save();
 
-    res.status(200).json({
-      status: "success",
-    });
-  } else {
-    next(new AppError("Sizga mumkinmas.", StatusCodes.FORBIDDEN));
-  }
+  res.status(200).json({
+    status: "success",
+  });
 };
 
 exports.updatePassword = async (req, res, next) => {

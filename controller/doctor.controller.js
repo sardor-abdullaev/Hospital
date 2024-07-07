@@ -1,5 +1,3 @@
-const express = require("express");
-
 const crud = require("./crud.controller");
 const Doctor = require("../model/doctor.model");
 
