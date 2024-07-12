@@ -1,20 +1,20 @@
 const express = require("express");
 const router = express.Router();
 
-const specController = require("../controller/spec.controller");
+const roomController = require("../controller/room.controller");
 const { restrictTo, setUserId, protect } = require("../middleware");
 
 router.use(protect, restrictTo("admin", "hr"));
 
 router
   .route("/")
-  .post(setUserId, specController.createSpec)
-  .get(specController.getAllSpec);
+  .post(setUserId, roomController.createRoom)
+  .get(roomController.getAllRoom);
 
 router
   .route("/:id")
-  .get(specController.getSpec)
-  .patch(specController.updateSpec)
-  .delete(specController.deleteSpec);
+  .get(roomController.getRoom)
+  .patch(roomController.updateRoom)
+  .delete(roomController.deleteRoom);
 
 module.exports = router;
