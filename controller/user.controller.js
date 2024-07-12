@@ -5,7 +5,6 @@ const Worker = require("../model/doctor.model");
 const Doctor = require("../model/doctor.model");
 
 const AppError = require("../utils/appError");
-const { isRestricted } = require("./auth.controller");
 
 const createAdmin = async () => {
   let admin = await User.findOne({ login: "admin", role: "admin" });
@@ -18,16 +17,32 @@ const createAdmin = async () => {
   });
 };
 
+const restrictedRoles = {
+  hr: ["doctor", "worker"],
+  doctor: ["patient"],
+};
+
+const isRestricted = (role, req) =>
+  req.user.role == "admin" ||
+  (restrictedRoles[req.user.role] &&
+    restrictedRoles[req.user.role].includes(role));
+
 const createUser = async (req, res) => {
   if (isRestricted(req.body.role, req)) {
     const newUser = await User.create(req.body);
     newUser.password = undefined;
+
     res.status(StatusCodes.CREATED).json({
       status: "success",
       data: newUser,
     });
   } else {
-    return next(new AppError("Sizga mumkinmas", StatusCodes.FORBIDDEN));
+    return next(
+      new AppError(
+        "You have no right to perform this action!",
+        StatusCodes.FORBIDDEN
+      )
+    );
   }
 };
 
@@ -36,7 +51,7 @@ const updateUser = async (req, res, next) => {
     const url = `${req.protocol}://${req.get("host")}/api/users/resetPassword`;
     return next(
       new AppError(
-        `Parolni yangilash uchun ${url} routedan foydalaning.`,
+        `In order to update password use '${url}' route `,
         StatusCodes.BAD_REQUEST
       )
     );
@@ -45,7 +60,7 @@ const updateUser = async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     return next(
-      new AppError("Foydalanuvchi topilmadi.", StatusCodes.NOT_FOUND)
+      new AppError("No user found with that ID", StatusCodes.NOT_FOUND)
     );
   }
 
@@ -64,7 +79,7 @@ const deleteUser = async (req, res, next) => {
   const user = await User.findById(req.params.id);
   if (!user) {
     return next(
-      new AppError("Foydalanuvchi topilmadi.", StatusCodes.NOT_FOUND)
+      new AppError("No user found with that ID.", StatusCodes.NOT_FOUND)
     );
   }
 
@@ -84,7 +99,7 @@ const getUser = async (req, res, next) => {
 
   if (!user) {
     return next(
-      new AppError("Foydalanuvchi topilmadi.", StatusCodes.NOT_FOUND)
+      new AppError("No user found with that ID.", StatusCodes.NOT_FOUND)
     );
   }
 

@@ -1,5 +1,6 @@
 const { StatusCodes } = require("http-status-codes");
 const { promisify } = require("util");
+const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
 const AppError = require("../utils/appError");
 

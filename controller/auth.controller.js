@@ -3,16 +3,6 @@ const { StatusCodes } = require("http-status-codes");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
 
-const restrictedRoles = {
-  hr: ["doctor", "worker"],
-  doctor: ["patient"],
-};
-
-exports.isRestricted = (role, req) =>
-  req.user.role == "admin" ||
-  (restrictedRoles[req.user.role] &&
-    restrictedRoles[req.user.role].includes(role));
-
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -49,7 +39,10 @@ exports.login = async (req, res, next) => {
   //   1) check if email and password exist
   if (!login || !password) {
     return next(
-      new AppError("Iltimos login va parolni kiriting", StatusCodes.BAD_REQUEST)
+      new AppError(
+        "Please provide login and password, please.",
+        StatusCodes.BAD_REQUEST
+      )
     );
   }
 
@@ -58,7 +51,7 @@ exports.login = async (req, res, next) => {
 
   if (!user || !(await user.correctPassword(password, user.password))) {
     return next(
-      new AppError("Login yoki parolingiz xato.", StatusCodes.BAD_REQUEST)
+      new AppError("Login or password is incorrect.", StatusCodes.BAD_REQUEST)
     );
   }
 
@@ -113,9 +106,7 @@ exports.updatePassword = async (req, res, next) => {
   const user = await User.findById(req.user._id).select("+password");
 
   if (!(await user.correctPassword(req.body.password, user.password))) {
-    return next(
-      new AppError("Kiritilgan parol noto'g'ri.", StatusCodes.UNAUTHORIZED)
-    );
+    return next(new AppError("Incorrect password.", StatusCodes.UNAUTHORIZED));
   }
 
   user.password = req.body.newpassword;
