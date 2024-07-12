@@ -1,17 +1,17 @@
 const express = require("express");
 const router = express.Router();
 
-const authController = require("../controller/auth.controller");
 const doctorController = require("../controller/doctor.controller");
+const { restrictTo, protect } = require("../middleware");
 
-router.use(authController.protect);
+router.use(protect);
 
 router
   .route("/")
-  .post(authController.restrictTo("admin", "hr"), doctorController.createDoctor)
-  .get(authController.restrictTo("admin", "hr"), doctorController.getAllDoctor);
+  .post(restrictTo("admin", "hr"), doctorController.createDoctor)
+  .get(restrictTo("admin", "hr"), doctorController.getAllDoctor);
 
-router.use(authController.restrictTo("admin", "hr", "self"));
+router.use(restrictTo("admin", "hr", "self"));
 router
   .route("/:id")
   .get(doctorController.getDoctor)

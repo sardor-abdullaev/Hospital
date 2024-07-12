@@ -1,51 +1,7 @@
 const AppError = require("../utils/appError");
 const { StatusCodes } = require("http-status-codes");
-const { promisify } = require("util");
 const jwt = require("jsonwebtoken");
 const User = require("../model/user.model");
-
-exports.protect = async (req, res, next) => {
-  // 1) Getting token and check of it's there
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
-  }
-
-  if (!token) {
-    next(
-      new AppError(
-        "Siz registratsiyadan o'tmagansiz. Ma'lumot olish uchun admin bilan bog'laning.",
-        StatusCodes.UNAUTHORIZED
-      )
-    );
-  }
-
-  // 2) Verification token
-  // jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-  //   console.log(decoded);
-  // });
-  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-
-  // 3) Check if user still exists
-  const currentUser = await User.findById(decoded.id);
-  if (!currentUser) {
-    next(
-      new AppError(
-        "Bu tokenga tegishli foydalanuvchi mavjud emas!",
-        StatusCodes.UNAUTHORIZED
-      )
-    );
-  }
-
-  // GRANT ACCESS TO PROTECTED ROUTE
-  req.user = currentUser;
-  next();
-};
 
 const restrictedRoles = {
   hr: ["doctor", "worker"],
@@ -56,37 +12,6 @@ exports.isRestricted = (role, req) =>
   req.user.role == "admin" ||
   (restrictedRoles[req.user.role] &&
     restrictedRoles[req.user.role].includes(role));
-
-exports.restrictTo = (...roles) => {
-  return (req, res, next) => {
-    if (roles.includes(req.user.role)) {
-      return next();
-    }
-    if (roles.includes("self")) {
-      req.body.user = req.params.id ? null : req.user._id;
-      req.params.id = req.body.user ? null : req.params.id;
-      if (
-        (req.user._id == req.body.user || req.user._id == req.params.id) &&
-        (req.user.role == "doctor" || req.user.role == "worker")
-      ) {
-        return next();
-      } else {
-        return next(
-          new AppError(
-            "You do not have permission to perform this action",
-            StatusCodes.FORBIDDEN
-          )
-        );
-      }
-    }
-    return next(
-      new AppError(
-        "You do not have permission to perform this action",
-        StatusCodes.FORBIDDEN
-      )
-    );
-  };
-};
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
