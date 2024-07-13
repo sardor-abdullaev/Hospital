@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const regionController = require("../controller/region.controller");
-const { restrictTo, protect } = require("../middleware");
+const authController = require("../controller/auth.controller");
 
-router.use(protect, restrictTo("admin"));
+router.use(authController.protect, authController.restrictTo("admin"));
 
 router
   .route("/")

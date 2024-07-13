@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const roomController = require("../controller/room.controller");
-const { restrictTo, setUserId, protect } = require("../middleware");
+const authController = require("../controller/auth.controller");
+const userController = require("../controller/user.controller");
 
-router.use(protect, restrictTo("admin", "hr"));
+router.use(authController.protect, authController.restrictTo("admin", "hr"));
 
 router
   .route("/")
-  .post(setUserId, roomController.createRoom)
+  .post(userController.setUserId, roomController.createRoom)
   .get(roomController.getAllRoom);
 
 router

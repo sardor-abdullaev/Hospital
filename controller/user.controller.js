@@ -3,6 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const User = require("../model/user.model");
 const Worker = require("../model/doctor.model");
 const Doctor = require("../model/doctor.model");
+const crud = require("./crud.controller");
 
 const AppError = require("../utils/appError");
 
@@ -16,6 +17,9 @@ const createAdmin = async () => {
     role: "admin",
   });
 };
+
+const updateUser = crud.updateOne(User);
+const deleteUser = crud.deleteOne(User);
 
 const restrictedRoles = {
   hr: ["doctor", "worker"],
@@ -44,54 +48,6 @@ const createUser = async (req, res) => {
       )
     );
   }
-};
-
-const updateUser = async (req, res, next) => {
-  if (req.body.password) {
-    const url = `${req.protocol}://${req.get("host")}/api/users/resetPassword`;
-    return next(
-      new AppError(
-        `In order to update password use '${url}' route `,
-        StatusCodes.BAD_REQUEST
-      )
-    );
-  }
-
-  const user = await User.findById(req.params.id);
-  if (!user) {
-    return next(
-      new AppError("No user found with that ID", StatusCodes.NOT_FOUND)
-    );
-  }
-
-  const updatedUser = await User.findByIdAndUpdate(user._id, req.body, {
-    runValidators: true,
-    new: true,
-  });
-
-  res.status(StatusCodes.OK).json({
-    status: "success",
-    user: updatedUser,
-  });
-};
-
-const deleteUser = async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-  if (!user) {
-    return next(
-      new AppError("No user found with that ID.", StatusCodes.NOT_FOUND)
-    );
-  }
-
-  await User.findByIdAndDelete(user._id);
-  res.status(StatusCodes.OK).json({
-    status: "success",
-  });
-};
-
-const getMe = async (req, res, next) => {
-  req.params.id = req.user.id;
-  next();
 };
 
 const getUser = async (req, res, next) => {
@@ -152,6 +108,17 @@ const getAllUsers = async (req, res, next) => {
   });
 };
 
+//==========  MIDDLEWARES  ==========
+const getMe = async (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
+
+const setUserId = (req, res, next) => {
+  req.body.user = req.user._id;
+  next();
+};
+
 module.exports = {
   createAdmin,
   createUser,
@@ -159,5 +126,6 @@ module.exports = {
   deleteUser,
   getUser,
   getMe,
+  setUserId,
   getAllUsers,
 };

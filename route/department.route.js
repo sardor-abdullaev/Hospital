@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
+const authController = require("../controller/auth.controller");
 const specController = require("../controller/spec.controller");
-const { restrictTo, setUserId, protect } = require("../middleware");
+const userController = require("../controller/user.controller");
 
-router.use(protect, restrictTo("admin", "hr"));
+router.use(authController.protect, authController.restrictTo("admin", "hr"));
 
 router
   .route("/")
-  .post(setUserId, specController.createSpec)
+  .post(userController.setUserId, specController.createSpec)
   .get(specController.getAllSpec);
 
 router
