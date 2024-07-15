@@ -187,7 +187,7 @@ exports.logout = (req, res) => {
 exports.resetToDefaultPassword = async (req, res, next) => {
   const user = await User.findById(req.body.user);
   if (!user) {
-    next(new AppError("Foydalanuvchi topilmadi!", StatusCodes.NOT_FOUND));
+    next(new AppError("No user found with that ID!", StatusCodes.NOT_FOUND));
   }
 
   user.password = process.env.DEFAULT_PASSWORD || "test123";

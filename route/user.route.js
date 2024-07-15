@@ -28,6 +28,6 @@ router
   .route("/:id")
   .get(userController.getUser)
   .patch(authController.passwordExists, userController.updateUser)
-  .delete(userController.deleteUser);
+  .delete(userController.deleteModelMid, userController.deleteUser);
 
 module.exports = router;

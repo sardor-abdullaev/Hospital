@@ -3,6 +3,8 @@ const router = express.Router();
 
 const doctorController = require("../controller/doctor.controller");
 const authController = require("../controller/auth.controller");
+const userController = require("../controller/user.controller");
+const Doctor = require("../model/doctor.model");
 
 router.use(authController.protect);
 
@@ -16,6 +18,6 @@ router
   .route("/:id")
   .get(doctorController.getDoctor)
   .patch(doctorController.updateDoctor)
-  .delete(doctorController.deleteDoctor);
+  .delete(userController.deleteUserMid(Doctor), doctorController.deleteDoctor);
 
 module.exports = router;

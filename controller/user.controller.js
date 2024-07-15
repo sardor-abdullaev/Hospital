@@ -119,6 +119,28 @@ const setUserId = (req, res, next) => {
   next();
 };
 
+const deleteModelMid = async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  const Model =
+    user.role == "doctor" ? Doctor : user.role == "worker" ? Worker : null;
+  if (!Model) {
+    return next();
+  }
+
+  await Model.findOneAndDelete({ user: user._id });
+  next();
+};
+
+const deleteUserMid = (Model) => {
+  return async (req, res, next) => {
+    const data = await Model.findById(req.params.id);
+    if (data) {
+      await User.findByIdAndDelete(data.user);
+    }
+    next();
+  };
+};
+
 module.exports = {
   createAdmin,
   createUser,
@@ -128,4 +150,6 @@ module.exports = {
   getMe,
   setUserId,
   getAllUsers,
+  deleteModelMid,
+  deleteUserMid,
 };
