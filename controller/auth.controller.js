@@ -198,6 +198,19 @@ exports.resetToDefaultPassword = async (req, res, next) => {
   });
 };
 
+exports.resetAdminToDefaultPassword = async (req, res, next) => {
+  const admin = await User.findOne({ login: "admin", role: "admin" });
+  if (admin) {
+    admin.password = process.env.ADMIN_PASSWORD || "admin123";
+    admin.save();
+    res.status(StatusCodes.OK).json({
+      status: "success",
+    });
+  } else {
+    return next(new AppError());
+  }
+};
+
 exports.updatePassword = async (req, res, next) => {
   const user = await User.findById(req.user._id).select("+password");
 

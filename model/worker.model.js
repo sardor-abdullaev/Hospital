@@ -39,7 +39,7 @@ const workerSchema = new mongoose.Schema({
       },
     },
   },
-  status: Number,
+  status: { type: Number, default: 1 },
 });
 
 module.exports = mongoose.model("Worker", workerSchema);

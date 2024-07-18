@@ -10,20 +10,20 @@ const doctorSchema = new mongoose.Schema(
     },
     fname: {
       type: String,
-      required: [true, "Ismingizni kiriting."],
+      required: [true, "Please provide your name."],
     },
     mname: {
       type: String,
-      required: [true, "Otangizni ismini kiriting."],
+      required: [true, "Please provide your middle name."],
     },
     lname: {
       type: String,
-      required: [true, "Familiyangizni kiriting."],
+      required: [true, "Please provide your lastname/surname."],
     },
     phone: {
       type: String,
       validate: {
-        message: "Tel raqam noto'g'ri kiritildi.",
+        message: "Not a valid phone number.",
         validator: function (val) {
           return validator.isMobilePhone(val);
         },
@@ -33,7 +33,7 @@ const doctorSchema = new mongoose.Schema(
     email: {
       type: String,
       validate: {
-        message: "Email noto'g'ri kiritildi.",
+        message: "Email address not valid.",
         validator: function (val) {
           return validator.isEmail(val);
         },

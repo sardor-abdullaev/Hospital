@@ -23,7 +23,8 @@ const deleteUser = crud.deleteOne(User);
 
 const restrictedRoles = {
   hr: ["doctor", "worker"],
-  doctor: ["patient"],
+  registration: ["patient"],
+  // doctor: ["patient"],
 };
 
 const isRestricted = (role, req) =>
@@ -31,8 +32,8 @@ const isRestricted = (role, req) =>
   (restrictedRoles[req.user.role] &&
     restrictedRoles[req.user.role].includes(role));
 
-const createUser = async (req, res) => {
-  if (isRestricted(req.body.role, req)) {
+const createUser = async (req, res, next) => {
+  if (isRestricted(req.body.role, req) && req.body.role !== "admin") {
     const newUser = await User.create(req.body);
     newUser.password = undefined;
 
@@ -141,17 +142,33 @@ const deleteUserMid = (Model) => {
   };
 };
 
-const checkUser = (role) => {
+const checkUser = (role, Model = null) => {
   return async (req, res, next) => {
     if (req.body.user) {
       const user = await User.findById(req.body.user);
       if (!user) {
-        return next(new AppError(`No user find with ${req.body.user} ID`));
+        return next(
+          new AppError(
+            `No user find with ${req.body.user} ID`,
+            StatusCodes.BAD_REQUEST
+          )
+        );
       }
       if (user.role != role) {
         return next(
-          new AppError(`The user's role does not match with ${role}`)
+          new AppError(
+            `The user's role does not match with ${role}`,
+            StatusCodes.BAD_REQUEST
+          )
         );
+      }
+      if (Model) {
+        const data = await Model.findOne({ user: req.body.user });
+        if (data) {
+          return next(
+            new AppError("The user already exists", StatusCodes.BAD_REQUEST)
+          );
+        }
       }
     }
     next();
