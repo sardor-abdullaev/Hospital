@@ -141,6 +141,23 @@ const deleteUserMid = (Model) => {
   };
 };
 
+const checkUser = (role) => {
+  return async (req, res, next) => {
+    if (req.body.user) {
+      const user = await User.findById(req.body.user);
+      if (!user) {
+        return next(new AppError(`No user find with ${req.body.user} ID`));
+      }
+      if (user.role != role) {
+        return next(
+          new AppError(`The user's role does not match with ${role}`)
+        );
+      }
+    }
+    next();
+  };
+};
+
 module.exports = {
   createAdmin,
   createUser,
@@ -152,4 +169,5 @@ module.exports = {
   getAllUsers,
   deleteModelMid,
   deleteUserMid,
+  checkUser,
 };
