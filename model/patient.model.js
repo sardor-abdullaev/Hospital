@@ -5,19 +5,24 @@ const patientSchema = new mongoose.Schema({
     type: mongoose.Types.ObjectId,
     ref: "User",
     required: true,
+  },
+  userIdPatient: {
+    type: mongoose.Types.ObjectId,
+    ref: "User",
+    required: true,
     unique: true,
   },
   fname: {
     type: String,
-    required: [true, "Ismingizni kiriting."],
+    required: [true, "Please provide your name."],
   },
   mname: {
     type: String,
-    required: [true, "Otangizni ismini kiriting."],
+    required: [true, "Please provide your middle name."],
   },
   lname: {
     type: String,
-    required: [true, "Familiyangizni kiriting."],
+    required: [true, "Please provide your lastname/surname."],
   },
   phone: {
     type: String,
@@ -32,7 +37,7 @@ const patientSchema = new mongoose.Schema({
   email: {
     type: String,
     validate: {
-      message: "Email noto'g'ri kiritildi.",
+      message: "Email address not valid.",
       validator: function (val) {
         return validator.isEmail(val);
       },
@@ -70,7 +75,6 @@ const patientSchema = new mongoose.Schema({
     default: Date.now(),
   },
   releaseDate: Date,
-  diagnos: String,
   married: Number,
   /*
    1-turmushga chiqqan,
@@ -89,7 +93,7 @@ const patientSchema = new mongoose.Schema({
   familyphone: {
     type: String,
     validate: {
-      message: "Tel raqam noto'g'ri kiritildi.",
+      message: "Invalid phone number",
       validator: function (val) {
         return validator.isMobilePhone(val);
       },
