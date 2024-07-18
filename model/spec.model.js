@@ -4,7 +4,7 @@
 const mongoose = require("mongoose");
 
 const specSchema = new mongoose.Schema({
-  user: {
+  userInput: {
     type: mongoose.Types.ObjectId,
     ref: "User",
     required: true,

@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const Patient = require("../model/patient.model");
+
 const patientController = require("../controller/patient.controller");
 const authController = require("../controller/auth.controller");
 const userController = require("../controller/user.controller");
@@ -12,13 +14,20 @@ router.use(
 
 router
   .route("/")
-  .post(userController.setUserId, patientController.createPatient)
+  .post(
+    userController.setUserId,
+    userController.checkUser("patient"),
+    patientController.createPatient
+  )
   .get(patientController.getAllPatient);
 
 router
   .route("/:id")
   .get(patientController.getPatient)
-  .patch(patientController.updatePatient)
-  .delete(patientController.deletePatient);
+  .patch(userController.checkUser("patient"), patientController.updatePatient)
+  .delete(
+    userController.deleteUserMid(Patient),
+    patientController.deletePatient
+  );
 
 module.exports = router;

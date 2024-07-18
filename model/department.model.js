@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const departmentSchema = new mongoose.Schema(
   {
-    user: {
+    userInput: {
       type: mongoose.Types.ObjectId,
       ref: "User",
       required: true,

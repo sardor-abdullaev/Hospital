@@ -3,6 +3,7 @@ const { StatusCodes } = require("http-status-codes");
 const User = require("../model/user.model");
 const Worker = require("../model/doctor.model");
 const Doctor = require("../model/doctor.model");
+const Patient = require("../model/patient.model");
 const crud = require("./crud.controller");
 
 const AppError = require("../utils/appError");
@@ -116,7 +117,7 @@ const getMe = async (req, res, next) => {
 };
 
 const setUserId = (req, res, next) => {
-  req.body.user = req.user._id;
+  req.body.userInput = req.user._id;
   next();
 };
 
@@ -142,10 +143,11 @@ const deleteUserMid = (Model) => {
   };
 };
 
-const checkUser = (role, Model = null) => {
+const checkUser = (role) => {
   return async (req, res, next) => {
     if (req.body.user) {
       const user = await User.findById(req.body.user);
+      // Check user existance
       if (!user) {
         return next(
           new AppError(
@@ -154,6 +156,8 @@ const checkUser = (role, Model = null) => {
           )
         );
       }
+
+      // Check role
       if (user.role != role) {
         return next(
           new AppError(
@@ -162,13 +166,22 @@ const checkUser = (role, Model = null) => {
           )
         );
       }
-      if (Model) {
-        const data = await Model.findOne({ user: req.body.user });
-        if (data) {
-          return next(
-            new AppError("The user already exists", StatusCodes.BAD_REQUEST)
-          );
-        }
+
+      // Check user existance in models
+      const Model =
+        role == "doctor"
+          ? Doctor
+          : role == "worker"
+          ? Worker
+          : role == "patient"
+          ? Patient
+          : null;
+
+      const data = await Model.findOne({ user: req.body.user });
+      if (data) {
+        return next(
+          new AppError("The user already exists", StatusCodes.BAD_REQUEST)
+        );
       }
     }
     next();

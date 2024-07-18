@@ -12,7 +12,7 @@ router
   .route("/")
   .post(
     authController.restrictTo("admin", "hr"),
-    userController.checkUser("doctor", Doctor),
+    userController.checkUser("doctor"),
     doctorController.createDoctor
   )
   .get(authController.restrictTo("admin", "hr"), doctorController.getAllDoctor);

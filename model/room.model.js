@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const roomSchema = new mongoose.Schema({
-  user: {
+  userInput: {
     type: mongoose.Types.ObjectId,
     ref: "User",
     required: true,
