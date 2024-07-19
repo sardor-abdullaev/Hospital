@@ -19,7 +19,7 @@ exports.protect = async (req, res, next) => {
   }
 
   if (!token) {
-    next(
+    return next(
       new AppError(
         "You are not currently logged in. For additional information, please contact the administrator or HR department.",
         StatusCodes.UNAUTHORIZED
@@ -187,9 +187,18 @@ exports.logout = (req, res) => {
 exports.resetToDefaultPassword = async (req, res, next) => {
   const user = await User.findById(req.body.user);
   if (!user) {
-    next(new AppError("No user found with that ID!", StatusCodes.NOT_FOUND));
+    return next(
+      new AppError("No user found with that ID!", StatusCodes.NOT_FOUND)
+    );
   }
-
+  if ((user.role = "admin")) {
+    return next(
+      new AppError(
+        "You have no right to carry out this action.",
+        StatusCodes.FORBIDDEN
+      )
+    );
+  }
   user.password = process.env.DEFAULT_PASSWORD || "test123";
   await user.save();
 

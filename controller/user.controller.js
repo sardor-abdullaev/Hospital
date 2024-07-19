@@ -124,7 +124,13 @@ const setUserId = (req, res, next) => {
 const deleteModelMid = async (req, res, next) => {
   const user = await User.findById(req.params.id);
   const Model =
-    user.role == "doctor" ? Doctor : user.role == "worker" ? Worker : null;
+    user.role == "doctor"
+      ? Doctor
+      : user.role == "worker"
+      ? Worker
+      : user.role == "patient"
+      ? Patient
+      : null;
   if (!Model) {
     return next();
   }
