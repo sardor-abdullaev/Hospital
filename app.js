@@ -6,6 +6,9 @@ const workerRouter = require("./route/worker.route");
 const doctorRouter = require("./route/doctor.route");
 const patientRouter = require("./route/patient.route");
 
+const historyDoctorRouter = require("./route/history-doctor.route");
+const historyPatientRouter = require("./route/history-patient.route");
+
 const regionRouter = require("./route/region.route");
 const districtRouter = require("./route/district.route");
 
@@ -33,6 +36,8 @@ app.use("/api/districts", districtRouter);
 app.use("/api/specs", specRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/rooms", roomRouter);
+app.use("/api/history-doctor", historyDoctorRouter);
+app.use("/api/history-patient", historyPatientRouter);
 
 app.all("*", (req, res, next) => {
   return next(
