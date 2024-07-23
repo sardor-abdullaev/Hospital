@@ -1,21 +1,31 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 
 const authController = require("../controller/auth.controller");
 const historyPatientController = require("../controller/historyPatient.controller");
 
 router.use(
   authController.protect,
-  authController.restrictTo("admin", "doctor")
+  authController.restrictTo("doctor"),
+  historyPatientController.checkDoctor
 );
 
 router
   .route("/")
   .post(
-    historyPatientController.setDoctor,
+    // authController.restrictTo("doctor"),
+    // historyPatientController.checkDoctor,
     historyPatientController.createHistoryPatient
   )
-  .get(historyPatientController.getAllHistoryPatient);
+  .get(
+    // authController.restrictTo("admin"),
+    historyPatientController.getAllHistoryPatient
+  );
+
+// router.use(
+//   authController.restrictTo("doctor"),
+//   historyPatientController.checkDoctor
+// );
 
 router
   .route("/:id")

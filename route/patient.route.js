@@ -6,6 +6,17 @@ const Patient = require("../model/patient.model");
 const patientController = require("../controller/patient.controller");
 const authController = require("../controller/auth.controller");
 const userController = require("../controller/user.controller");
+const historyPatientRouter = require("./history-patient.route");
+
+// Merge with historyPatientRouter
+router.use(
+  "/:patientId/history",
+  (req, res, next) => {
+    req.body.patient = req.params.patientId;
+    next();
+  },
+  historyPatientRouter
+);
 
 router.use(
   authController.protect,

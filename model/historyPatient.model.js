@@ -13,7 +13,7 @@ const historyPatientSchema = new mongoose.Schema({
   },
   diagnosType: String,
   diagnos: String,
-  startDate: Date,
+  startDate: { type: Date, default: Date.now },
   endDate: Date,
   status: {
     type: Number,
