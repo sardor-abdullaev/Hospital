@@ -45,7 +45,7 @@ const createUser = async (req, res, next) => {
   } else {
     return next(
       new AppError(
-        "You have no right to perform this action!",
+        "You have permission to carry out this action!",
         StatusCodes.FORBIDDEN
       )
     );

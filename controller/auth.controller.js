@@ -67,7 +67,7 @@ exports.restrictTo = (...roles) => {
       } else {
         return next(
           new AppError(
-            "You do not have permission to perform this action",
+            "You do not have permission to carry out this action",
             StatusCodes.FORBIDDEN
           )
         );
@@ -75,7 +75,7 @@ exports.restrictTo = (...roles) => {
     } else
       return next(
         new AppError(
-          "You do not have permission to perform this action",
+          "You do not have permission to carry out this action",
           StatusCodes.FORBIDDEN
         )
       );
@@ -194,7 +194,7 @@ exports.resetToDefaultPassword = async (req, res, next) => {
   if ((user.role = "admin")) {
     return next(
       new AppError(
-        "You have no right to carry out this action.",
+        "You have no permission to carry out this action.",
         StatusCodes.FORBIDDEN
       )
     );

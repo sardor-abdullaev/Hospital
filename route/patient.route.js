@@ -11,10 +11,7 @@ const historyPatientRouter = require("./history-patient.route");
 // Merge with historyPatientRouter
 router.use(
   "/:patientId/history",
-  (req, res, next) => {
-    req.body.patient = req.params.patientId;
-    next();
-  },
+  patientController.setPatient,
   historyPatientRouter
 );
 

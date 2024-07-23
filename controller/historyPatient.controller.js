@@ -14,12 +14,11 @@ const deleteHistoryPatient = crud.deleteOne(HistoryPatient);
 
 //==========  MIDDLEWARES  ==========
 
-const setDoctor = (req, res, next) => {
-  req.body.doctor = req.user._id;
-  next();
-};
-
 const checkDoctor = async (req, res, next) => {
+  if (req.user.role == "admin") {
+    return next();
+  }
+
   let doctorId;
   // create
   if (req.body.patient) {
@@ -28,17 +27,17 @@ const checkDoctor = async (req, res, next) => {
   } else {
     // update delete
     const historyPatient = await HistoryPatient.findById(req.params.id);
-    doctorId = historyPatient.doctor;
+    if (historyPatient) doctorId = historyPatient.doctor;
   }
 
   // get doctor id
   const doctor = await Doctor.findOne({ user: req.user._id });
   // console.log(doctorId, doctor._id, doctorId != doctor.id);
 
-  if (doctorId != doctor.id) {
+  if (!doctor || doctorId != doctor.id) {
     return next(
       new AppError(
-        "You have no right to carry out this action",
+        "You have no permission to carry out this action",
         StatusCodes.FORBIDDEN
       )
     );
@@ -55,6 +54,5 @@ module.exports = {
   getHistoryPatient,
   updateHistoryPatient,
   deleteHistoryPatient,
-  setDoctor,
   checkDoctor,
 };
