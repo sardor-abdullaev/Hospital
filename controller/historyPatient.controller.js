@@ -23,18 +23,18 @@ const checkDoctor = async (req, res, next) => {
   // create
   if (req.body.patient) {
     const patient = await Patient.findById(req.body.patient);
-    doctorId = patient.doctor;
+    doctorId = patient?.doctor;
   } else {
     // update delete
     const historyPatient = await HistoryPatient.findById(req.params.id);
-    if (historyPatient) doctorId = historyPatient.doctor;
+    doctorId = historyPatient?.doctor;
   }
 
   // get doctor id
   const doctor = await Doctor.findOne({ user: req.user._id });
   // console.log(doctorId, doctor._id, doctorId != doctor.id);
 
-  if (!doctor || doctorId != doctor.id) {
+  if (doctorId != doctor?.id) {
     return next(
       new AppError(
         "You have no permission to carry out this action",
