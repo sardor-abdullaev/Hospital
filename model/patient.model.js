@@ -69,7 +69,7 @@ const patientSchema = new mongoose.Schema({
     ref: "District",
     // required: true,
   },
-  addres: String,
+  address: String,
   arriveDate: {
     type: Date,
     default: Date.now(),
