@@ -7,10 +7,16 @@ const getHistoryDoctor = crud.getOne(HistoryDoctor);
 const updateHistoryDoctor = crud.updateOne(HistoryDoctor);
 const deleteHistoryDoctor = crud.deleteOne(HistoryDoctor);
 
+const setDoctor = async (req, res, next) => {
+  if (!req.body.doctor) req.body.doctor = req.params.doctorId;
+  next();
+};
+
 module.exports = {
   createHistoryDoctor,
   getAllHistoryDoctor,
   getHistoryDoctor,
   updateHistoryDoctor,
   deleteHistoryDoctor,
+  setDoctor,
 };

@@ -5,6 +5,10 @@ const doctorController = require("../controller/doctor.controller");
 const authController = require("../controller/auth.controller");
 const userController = require("../controller/user.controller");
 const Doctor = require("../model/doctor.model");
+const doctorHistoryRouter = require("./history-doctor.route");
+
+// Merge with historyDoctorRouter
+router.use("/:doctorId/history", doctorHistoryRouter);
 
 router.use(authController.protect);
 
