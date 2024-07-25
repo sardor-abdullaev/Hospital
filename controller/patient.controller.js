@@ -1,5 +1,7 @@
 const crud = require("./crud.controller");
 const Patient = require("../model/patient.model");
+const Doctor = require("../model/doctor.model");
+const { StatusCodes } = require("http-status-codes");
 
 const createPatient = crud.createOne(Patient);
 const getAllPatient = crud.getAll(Patient);
@@ -12,6 +14,21 @@ const setPatient = (req, res, next) => {
   next();
 };
 
+const getMyPatients = async (req, res) => {
+  if (req.user.role == "doctor") {
+    const doctor = await Doctor.findOne({ user: req.user._id });
+    req.params.doctorId = doctor._id;
+  }
+
+  const patients = await Patient.find({ doctor: req.params.doctorId });
+
+  return res.status(StatusCodes.OK).json({
+    status: "success",
+    results: patients.length,
+    patients,
+  });
+};
+
 module.exports = {
   createPatient,
   getAllPatient,
@@ -19,4 +36,5 @@ module.exports = {
   updatePatient,
   deletePatient,
   setPatient,
+  getMyPatients,
 };

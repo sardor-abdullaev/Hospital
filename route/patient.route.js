@@ -15,10 +15,15 @@ router.use(
   historyPatientRouter
 );
 
+router.use(authController.protect);
+
 router.use(
-  authController.protect,
-  authController.restrictTo("registration", "admin")
+  "/bydoctor/:doctorId",
+  authController.restrictTo("doctor", "registration", "admin"),
+  patientController.getMyPatients
 );
+
+router.use(authController.restrictTo("registration", "admin"));
 
 router
   .route("/")
