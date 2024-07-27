@@ -16,6 +16,9 @@ const specRouter = require("./route/spec.route");
 const departmentRouter = require("./route/department.route");
 const roomRouter = require("./route/room.route");
 
+const serviceRouter = require("./route/service.route");
+const serviceItemRouter = require("./route/service-item.route");
+
 const AppError = require("./utils/appError");
 const { errorHandler } = require("./utils/errorHandler");
 const { StatusCodes } = require("http-status-codes");
@@ -27,8 +30,11 @@ app.use(cookieParser());
 
 app.use("/api/users", userRouter);
 app.use("/api/doctors", doctorRouter);
-app.use("/api/workers", workerRouter);
 app.use("/api/patients", patientRouter);
+app.use("/api/workers", workerRouter);
+
+app.use("/api/history-doctor", historyDoctorRouter);
+app.use("/api/history-patient", historyPatientRouter);
 
 app.use("/api/regions", regionRouter);
 app.use("/api/districts", districtRouter);
@@ -36,8 +42,9 @@ app.use("/api/districts", districtRouter);
 app.use("/api/specs", specRouter);
 app.use("/api/departments", departmentRouter);
 app.use("/api/rooms", roomRouter);
-app.use("/api/history-doctor", historyDoctorRouter);
-app.use("/api/history-patient", historyPatientRouter);
+
+app.use("/api/services", serviceRouter);
+app.use("/api/service-items", serviceItemRouter);
 
 app.all("*", (req, res, next) => {
   return next(
@@ -47,6 +54,7 @@ app.all("*", (req, res, next) => {
     )
   );
 });
+
 app.use(errorHandler);
 
 module.exports = app;
