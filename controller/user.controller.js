@@ -1,10 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
 
 const User = require("../model/user.model");
-const Worker = require("../model/doctor.model");
-const Doctor = require("../model/doctor.model");
-const Patient = require("../model/patient.model");
-const crud = require("./crud.controller");
+// const Worker = require("../model/doctor.model");
+// const Doctor = require("../model/doctor.model");
+// const Patient = require("../model/patient.model");
+// const crud = require("./crud.controller");
 
 const AppError = require("../utils/appError");
 
@@ -19,8 +19,8 @@ const createAdmin = async () => {
   });
 };
 
-const updateUser = crud.updateOne(User);
-const deleteUser = crud.deleteOne(User);
+// const updateUser = crud.updateOne(User);
+// const deleteUser = crud.deleteOne(User);
 
 const restrictedRoles = {
   hr: ["doctor", "worker"],
@@ -35,17 +35,18 @@ const isRestricted = (role, req) =>
 
 const createUser = async (req, res, next) => {
   if (isRestricted(req.body.role, req) && req.body.role !== "admin") {
-    const newUser = await User.create(req.body);
-    newUser.password = undefined;
-
-    res.status(StatusCodes.CREATED).json({
-      status: "success",
-      data: newUser,
+    const newUser = await User.create({
+      login: req.body.login,
+      password: req.body.password,
+      role: req.body.role,
     });
+    req.body.login = req.body.password = req.body.role = null;
+
+    return newUser._id;
   } else {
     return next(
       new AppError(
-        "You have permission to carry out this action!",
+        "You have no permission to carry out this action!",
         StatusCodes.FORBIDDEN
       )
     );
@@ -53,7 +54,7 @@ const createUser = async (req, res, next) => {
 };
 
 const getUser = async (req, res, next) => {
-  const user = await User.findById(req.params.id);
+  const user = await User.findById(req.params.id).select("login role");
 
   if (!user) {
     return next(
@@ -61,54 +62,54 @@ const getUser = async (req, res, next) => {
     );
   }
 
-  const Model =
-    user.role == "doctor" ? Doctor : user.role == "worker" ? Worker : null;
+  // const Model =
+  //   user.role == "doctor" ? Doctor : user.role == "worker" ? Worker : null;
 
-  let userPopulate;
-  if (Model) {
-    userPopulate = await Model.findOne({ user: user._id }).populate({
-      path: "user",
-      select: "login role",
-    });
-  }
+  // let userPopulate;
+  // if (Model) {
+  //   userPopulate = await Model.findOne({ user: user._id }).populate({
+  //     path: "user",
+  //     select: "login role",
+  //   });
+  // }
 
   res.status(StatusCodes.OK).json({
     status: "success",
-    userPopulate: userPopulate || user,
+    user,
   });
 };
 
-const getAllUsers = async (req, res, next) => {
-  const users = await User.find({ role: { $ne: "admin" } }).select(
-    "login role"
-  );
+// const getAllUsers = async (req, res, next) => {
+//   const users = await User.find({ role: { $ne: "admin" } }).select(
+//     "login role"
+//   );
 
-  let userPopulate;
-  const usersPopulatePromise = users.map(async (user) => {
-    userPopulate = null;
+//   let userPopulate;
+//   const usersPopulatePromise = users.map(async (user) => {
+//     userPopulate = null;
 
-    const Model =
-      user.role == "doctor" ? Doctor : user.role == "worker" ? Worker : null;
+//     const Model =
+//       user.role == "doctor" ? Doctor : user.role == "worker" ? Worker : null;
 
-    if (Model) {
-      userPopulate = await Model.findOne({ user: user._id })
-        .select("fname mname lname")
-        .populate({
-          path: "user",
-          select: "login role",
-        });
-    }
+//     if (Model) {
+//       userPopulate = await Model.findOne({ user: user._id })
+//         .select("fname mname lname")
+//         .populate({
+//           path: "user",
+//           select: "login role",
+//         });
+//     }
 
-    return userPopulate || user;
-  });
+//     return userPopulate || user;
+//   });
 
-  const usersPopulate = await Promise.all(usersPopulatePromise);
-  res.status(StatusCodes.OK).json({
-    status: "success",
-    results: usersPopulate.length,
-    usersPopulate,
-  });
-};
+//   const usersPopulate = await Promise.all(usersPopulatePromise);
+//   res.status(StatusCodes.OK).json({
+//     status: "success",
+//     results: usersPopulate.length,
+//     usersPopulate,
+//   });
+// };
 
 //==========  MIDDLEWARES  ==========
 const getMe = async (req, res, next) => {
@@ -121,23 +122,23 @@ const setUserId = (req, res, next) => {
   next();
 };
 
-const deleteModelMid = async (req, res, next) => {
-  const user = await User.findById(req.params.id);
-  const Model =
-    user.role == "doctor"
-      ? Doctor
-      : user.role == "worker"
-      ? Worker
-      : user.role == "patient"
-      ? Patient
-      : null;
-  if (!Model) {
-    return next();
-  }
+// const deleteModelMid = async (req, res, next) => {
+//   const user = await User.findById(req.params.id);
+//   const Model =
+//     user.role == "doctor"
+//       ? Doctor
+//       : user.role == "worker"
+//       ? Worker
+//       : user.role == "patient"
+//       ? Patient
+//       : null;
+//   if (!Model) {
+//     return next();
+//   }
 
-  await Model.findOneAndDelete({ user: user._id });
-  next();
-};
+//   await Model.findOneAndDelete({ user: user._id });
+//   next();
+// };
 
 const deleteUserMid = (Model) => {
   return async (req, res, next) => {
@@ -149,61 +150,29 @@ const deleteUserMid = (Model) => {
   };
 };
 
-const checkUser = (role) => {
-  return async (req, res, next) => {
-    if (req.body.user) {
-      const user = await User.findById(req.body.user);
-      // Check user existance
-      if (!user) {
-        return next(
-          new AppError(
-            `No user find with ${req.body.user} ID`,
-            StatusCodes.BAD_REQUEST
-          )
-        );
-      }
-
-      // Check role
-      if (user.role != role) {
-        return next(
-          new AppError(
-            `The user's role does not match with ${role}`,
-            StatusCodes.BAD_REQUEST
-          )
-        );
-      }
-
-      // Check user existance in models
-      const Model =
-        role == "doctor"
-          ? Doctor
-          : role == "worker"
-          ? Worker
-          : role == "patient"
-          ? Patient
-          : null;
-
-      const data = await Model.findOne({ user: req.body.user });
-      if (data) {
-        return next(
-          new AppError("The user already exists", StatusCodes.BAD_REQUEST)
-        );
-      }
-    }
-    next();
-  };
+const checkUser = async (req, res, next) => {
+  const user = await User.findOne({ login: req.body.login });
+  if (user) {
+    return next(
+      new AppError(
+        `${req.body.login} login is already taken.`,
+        StatusCodes.BAD_REQUEST
+      )
+    );
+  }
+  next();
 };
 
 module.exports = {
   createAdmin,
   createUser,
-  updateUser,
-  deleteUser,
+  // updateUser,
+  // deleteUser,
   getUser,
   getMe,
   setUserId,
-  getAllUsers,
-  deleteModelMid,
+  // getAllUsers,
+  // deleteModelMid,
   deleteUserMid,
   checkUser,
 };

@@ -8,7 +8,9 @@ const { StatusCodes } = require("http-status-codes");
 
 const createHistoryPatient = crud.createOne(HistoryPatient);
 const getAllHistoryPatient = crud.getAll(HistoryPatient);
-const getHistoryPatient = crud.getOne(HistoryPatient);
+const getHistoryPatient = crud.getOne(HistoryPatient, {
+  path: "doctor patient",
+});
 const updateHistoryPatient = crud.updateOne(HistoryPatient);
 const deleteHistoryPatient = crud.deleteOne(HistoryPatient);
 

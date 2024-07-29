@@ -16,7 +16,7 @@ router
   .route("/")
   .post(
     authController.restrictTo("admin", "hr"),
-    userController.checkUser("doctor"),
+    userController.checkUser,
     doctorController.createDoctor
   )
   .get(authController.restrictTo("admin", "hr"), doctorController.getAllDoctor);
@@ -25,7 +25,7 @@ router.use(authController.restrictTo("admin", "hr", "self"));
 router
   .route("/:id")
   .get(doctorController.getDoctor)
-  .patch(userController.checkUser("doctor"), doctorController.updateDoctor)
+  .patch(doctorController.updateDoctor)
   .delete(userController.deleteUserMid(Doctor), doctorController.deleteDoctor);
 
 module.exports = router;

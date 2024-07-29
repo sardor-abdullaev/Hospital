@@ -3,7 +3,7 @@ const HistoryDoctor = require("../model/historyDoctor.model");
 
 const createHistoryDoctor = crud.createOne(HistoryDoctor);
 const getAllHistoryDoctor = crud.getAll(HistoryDoctor);
-const getHistoryDoctor = crud.getOne(HistoryDoctor);
+const getHistoryDoctor = crud.getOne(HistoryDoctor, { path: "doctor" });
 const updateHistoryDoctor = crud.updateOne(HistoryDoctor);
 const deleteHistoryDoctor = crud.deleteOne(HistoryDoctor);
 

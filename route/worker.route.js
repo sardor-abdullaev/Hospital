@@ -12,7 +12,7 @@ router
   .route("/")
   .post(
     authController.restrictTo("admin", "hr"),
-    userController.checkUser("worker"),
+    userController.checkUser,
     workerController.createWorker
   )
   .get(authController.restrictTo("admin", "hr"), workerController.getAllWorker);
@@ -21,7 +21,7 @@ router.use(authController.restrictTo("admin", "hr", "self"));
 router
   .route("/:id")
   .get(workerController.getWorker)
-  .patch(userController.checkUser("worker"), workerController.updateWorker)
+  .patch(workerController.updateWorker)
   .delete(userController.deleteUserMid(Worker), workerController.deleteWorker);
 
 module.exports = router;

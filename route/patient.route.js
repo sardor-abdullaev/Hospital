@@ -29,7 +29,7 @@ router
   .route("/")
   .post(
     userController.setUserId,
-    userController.checkUser("patient"),
+    userController.checkUser,
     patientController.createPatient
   )
   .get(patientController.getAllPatient);
@@ -37,7 +37,7 @@ router
 router
   .route("/:id")
   .get(patientController.getPatient)
-  .patch(userController.checkUser("patient"), patientController.updatePatient)
+  .patch(patientController.updatePatient)
   .delete(
     userController.deleteUserMid(Patient),
     patientController.deletePatient

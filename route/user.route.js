@@ -20,15 +20,13 @@ router.post(
 );
 router.get("/me", userController.getMe, userController.getUser);
 
-router
-  .route("/")
-  .get(authController.restrictTo("admin", "hr"), userController.getAllUsers);
+// router
+//   .route("/")
+//   .get(authController.restrictTo("admin", "hr"), userController.getAllUsers);
 
 router.use(authController.restrictTo("admin", "hr", "self"));
-router
-  .route("/:id")
-  .get(userController.getUser)
-  .patch(authController.passwordExists, userController.updateUser)
-  .delete(userController.deleteModelMid, userController.deleteUser);
+router.route("/:id").get(userController.getUser);
+// .patch(authController.passwordExists, userController.updateUser)
+// .delete(userController.deleteModelMid, userController.deleteUser);
 
 module.exports = router;

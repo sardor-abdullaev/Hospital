@@ -2,10 +2,18 @@ const crud = require("./crud.controller");
 const Patient = require("../model/patient.model");
 const Doctor = require("../model/doctor.model");
 const { StatusCodes } = require("http-status-codes");
+const { createUser } = require("./user.controller");
 
-const createPatient = crud.createOne(Patient);
+const createPatient = async (req, res, next) => {
+  req.body.role = "patient";
+  const userId = await createUser(req, res, next);
+  req.body.user = userId;
+
+  crud.createOne(Patient)(req, res, next);
+};
+
 const getAllPatient = crud.getAll(Patient);
-const getPatient = crud.getOne(Patient);
+const getPatient = crud.getOne(Patient, { path: "user doctor" });
 const updatePatient = crud.updateOne(Patient);
 const deletePatient = crud.deleteOne(Patient);
 
