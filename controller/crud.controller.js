@@ -1,10 +1,14 @@
 const { StatusCodes } = require("http-status-codes");
 const AppError = require("../utils/appError");
 
-exports.createOne = (Model) => async (req, res, next) => {
-  const doc = await Model.create(req.body);
+exports.createOne = (Model, popOptions) => async (req, res, next) => {
+  let doc = await Model.create(req.body);
 
-  res.status(StatusCodes.CREATED).json({
+  if (popOptions) {
+    doc = await Model.findById(doc._id).populate(popOptions);
+  }
+
+  return res.status(StatusCodes.CREATED).json({
     status: "success",
     data: doc,
   });

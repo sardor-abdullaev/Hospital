@@ -3,11 +3,10 @@ const Doctor = require("../model/doctor.model");
 const { createUser } = require("./user.controller");
 
 const createDoctor = async (req, res, next) => {
-  req.body.role = "doctor";
   const userId = await createUser(req, res, next);
   req.body.user = userId;
 
-  crud.createOne(Doctor)(req, res, next);
+  crud.createOne(Doctor, { path: "user" })(req, res, next);
 };
 
 const getAllDoctor = crud.getAll(Doctor);

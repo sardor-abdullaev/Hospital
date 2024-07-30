@@ -5,11 +5,10 @@ const { StatusCodes } = require("http-status-codes");
 const { createUser } = require("./user.controller");
 
 const createPatient = async (req, res, next) => {
-  req.body.role = "patient";
   const userId = await createUser(req, res, next);
   req.body.user = userId;
 
-  crud.createOne(Patient)(req, res, next);
+  crud.createOne(Patient, { path: "user" })(req, res, next);
 };
 
 const getAllPatient = crud.getAll(Patient);
