@@ -31,8 +31,10 @@ exports.getOne = (Model, popOptions) => async (req, res, next) => {
   });
 };
 
-exports.getAll = (Model) => async (req, res, next) => {
-  const doc = await Model.find();
+exports.getAll = (Model, popOptions) => async (req, res, next) => {
+  let query = Model.find();
+  if (popOptions) query = query.populate(popOptions);
+  const doc = await query;
 
   res.status(StatusCodes.OK).json({
     status: "success",

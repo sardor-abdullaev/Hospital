@@ -21,7 +21,7 @@ router
   )
   .get(authController.restrictTo("admin", "hr"), doctorController.getAllDoctor);
 
-router.use(authController.restrictTo("admin", "hr", "self"));
+router.use(authController.restrictTo("admin", "hr"));
 router
   .route("/:id")
   .get(doctorController.getDoctor)

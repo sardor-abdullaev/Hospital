@@ -53,25 +53,6 @@ exports.restrictTo = (...roles) => {
   return (req, res, next) => {
     if (roles.includes(req.user.role)) {
       return next();
-    } else if (roles.includes("self")) {
-      // If 'self' is included in roles array, prevent possible leak
-      req.body.user = req.params.id ? null : req.user._id;
-      req.params.id = req.body.user ? null : req.params.id;
-
-      // Check if the user can perform the action based on specific conditions
-      if (
-        (req.user._id == req.body.user || req.user._id == req.params.id) &&
-        (req.user.role == "doctor" || req.user.role == "worker")
-      ) {
-        return next();
-      } else {
-        return next(
-          new AppError(
-            "You do not have permission to carry out this action",
-            StatusCodes.FORBIDDEN
-          )
-        );
-      }
     } else
       return next(
         new AppError(

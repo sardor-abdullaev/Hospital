@@ -11,7 +11,7 @@ router.get("/teserdrowssapnimda", authController.resetAdminToDefaultPassword);
 router.use(authController.protect);
 
 router.get("/logout", authController.logout);
-router.post("/create", userController.createUser);
+// router.post("/create", userController.createUser);
 router.post("/updateMyPassword", authController.updatePassword);
 router.post(
   "/resetPassword",
@@ -24,7 +24,7 @@ router.get("/me", userController.getMe, userController.getUser);
 //   .route("/")
 //   .get(authController.restrictTo("admin", "hr"), userController.getAllUsers);
 
-router.use(authController.restrictTo("admin", "hr", "self"));
+router.use(authController.restrictTo("admin", "hr"));
 router.route("/:id").get(userController.getUser);
 // .patch(authController.passwordExists, userController.updateUser)
 // .delete(userController.deleteModelMid, userController.deleteUser);
